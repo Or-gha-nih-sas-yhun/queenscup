@@ -1,3 +1,7 @@
+# "/" is a folder, so it relies on DirectoryIndex rather than the rewrite
+# below; without this the home page can come back 403 Forbidden.
+DirectoryIndex index.php
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

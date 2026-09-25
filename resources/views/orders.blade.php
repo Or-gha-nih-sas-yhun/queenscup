@@ -2329,8 +2329,7 @@ function openOrderReceipt(id){
 
 function printReceipt(){
   var c=document.getElementById('receiptContent').innerHTML;var w=window.open('','','width=400,height=600');
-  w.document.write('<html><head><title>Receipt</title><style>body{font-family:monospace;padding:20px}.receipt{max-width:300px;margin:0 auto}h4{text-align:center;margin-bottom:3px}.receipt-sub{text-align:center;font-size:10px;color:#666;margin-bottom:12px}hr{border:none;border-top:1px dashed #ccc;margin:8px 0}.receipt-row{display:flex;justify-content:space-between;font-size:11px;margin:3px 0}.receipt-total{font-weight:bold;font-size:13px}.receipt-logo{text-align:center;margin-bottom:10px}.receipt-logo img{width:48px;height:48px;border-radius:50%;object-fit:cover}</style><script src="{{ asset('js/security.js') }}"></script>
-</head><body>'+c+'</body></html>');
+  w.document.write('<html><head><title>Receipt</title><style>body{font-family:monospace;padding:20px}.receipt{max-width:300px;margin:0 auto}h4{text-align:center;margin-bottom:3px}.receipt-sub{text-align:center;font-size:10px;color:#666;margin-bottom:12px}hr{border:none;border-top:1px dashed #ccc;margin:8px 0}.receipt-row{display:flex;justify-content:space-between;font-size:11px;margin:3px 0}.receipt-total{font-weight:bold;font-size:13px}.receipt-logo{text-align:center;margin-bottom:10px}.receipt-logo img{width:48px;height:48px;border-radius:50%;object-fit:cover}</style><script src="{{ asset('js/security.js') }}"><\/script></head><body>'+c+'</body></html>');
   w.document.close();w.print();
 }
 function holdOrder(){if(cart.length===0){showToast('Cart is empty','warning');return;}showToast('Order held','info');clearCart();}

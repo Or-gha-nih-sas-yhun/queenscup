@@ -1,0 +1,19 @@
+# On Hostinger the whole project is uploaded into public_html, so the web
+# server's folder is the project root rather than public/. Send every request
+# into public/, where Laravel's index.php and the public assets live. This also
+# keeps artisan, composer.json, storage/logs and the rest of the project out of
+# reach. Without this file every page returns Hostinger's 404, so it is kept in
+# the repository and redeploys cannot lose it.
+
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# If rewriting is ever unavailable, refuse everything rather than serve the
+# project's private files.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>
