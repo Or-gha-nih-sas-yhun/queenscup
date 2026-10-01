@@ -6,6 +6,9 @@ use App\Models\User;
 use App\Services\CustomerAccountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Customer accounts.
@@ -81,6 +84,58 @@ class CustomerAccountController extends Controller
         }
 
         return $this->signIn($request, $user);
+    }
+
+    public function showForgotPassword()
+    {
+        return view('customer-forgot-password');
+    }
+
+    public function sendPasswordResetLink(Request $request): JsonResponse
+    {
+        $data = $request->validate(['email' => ['required', 'email']]);
+        $user = User::where('email', $data['email'])->where('role', 'customer')->first();
+
+        if ($user) {
+            $token = Password::broker('users')->createToken($user);
+            $user->sendPasswordResetNotification($token);
+        }
+
+        return response()->json([
+            'message' => 'If that email belongs to a customer account, a password reset link is on its way.',
+        ]);
+    }
+
+    public function showResetPassword(Request $request, string $token)
+    {
+        return view('customer-reset-password', [
+            'token' => $token,
+            'email' => $request->query('email', ''),
+        ]);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
+        ]);
+
+        $user = User::where('email', $data['email'])->where('role', 'customer')->first();
+        if (! $user) {
+            throw ValidationException::withMessages(['email' => 'This password reset link is invalid or has expired.']);
+        }
+
+        $status = Password::broker('users')->reset($data, function (User $user, string $password) {
+            $user->forceFill(['password' => Hash::make($password)])->save();
+        });
+
+        if ($status !== Password::PASSWORD_RESET) {
+            throw ValidationException::withMessages(['email' => __($status)]);
+        }
+
+        return response()->json(['message' => 'Your password has been reset. You can now sign in.']);
     }
 
     public function logout(Request $request): JsonResponse

@@ -144,6 +144,10 @@ Route::post('/customer/register', [CustomerAccountController::class, 'register']
 Route::post('/customer/verify', [CustomerAccountController::class, 'verify'])->middleware('throttle:10,1')->name('customer.verify');
 Route::post('/customer/resend', [CustomerAccountController::class, 'resend'])->middleware('throttle:5,1')->name('customer.resend');
 Route::post('/customer/login', [CustomerAccountController::class, 'login'])->middleware('throttle:10,1')->name('customer.login');
+Route::get('/customer/forgot-password', [CustomerAccountController::class, 'showForgotPassword'])->name('customer.password.request');
+Route::post('/customer/forgot-password', [CustomerAccountController::class, 'sendPasswordResetLink'])->middleware('throttle:5,1')->name('customer.password.email');
+Route::get('/customer/reset-password/{token}', [CustomerAccountController::class, 'showResetPassword'])->name('customer.password.reset');
+Route::post('/customer/reset-password', [CustomerAccountController::class, 'resetPassword'])->middleware('throttle:10,1')->name('customer.password.update');
 /*
 | The customer assistant. Open to anyone so it works on the landing page,
 | but only a signed-in customer gets a stored conversation.

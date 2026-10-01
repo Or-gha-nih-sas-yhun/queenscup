@@ -569,6 +569,7 @@ body{background:radial-gradient(circle at top right,rgba(22,199,106,.08),transpa
         <div class="login-field"><label>Email</label><div class="input-icon"><i class="fas fa-envelope"></i><input type="email" id="signinEmail" placeholder="you@example.com" autocomplete="email"></div></div>
         <div class="login-field"><label>Password</label><div class="input-icon"><i class="fas fa-lock"></i><input type="password" id="signinPassword" placeholder="Your password" autocomplete="current-password"><button type="button" class="pw-toggle" onclick="togglePw('signinPassword',this)"><i class="fas fa-eye"></i></button></div></div>
         <button class="login-btn" id="signinBtn" onclick="handleCustomerSignIn()">Sign In</button>
+        <div style="margin-top:12px;text-align:center;font-size:11px"><a class="link-inline" href="{{ route('customer.password.request') }}">Forgot password?</a></div>
         <div style="margin-top:16px;text-align:center;font-size:11px;color:var(--fg-muted)">New here? <button type="button" class="link-inline" onclick="switchLoginTab('register')">Create an account</button></div>
       </div>
 
