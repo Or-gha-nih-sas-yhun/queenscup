@@ -6,20 +6,20 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class CustomerPasswordResetMail extends Mailable
+class CustomerPasswordResetOtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public function __construct(
         public string $customerName,
-        public string $resetUrl,
+        public string $otp,
         public int $minutes = 60,
     ) {
     }
 
     public function build(): self
     {
-        return $this->subject("Reset your Queen's Cup password")
-            ->text('emails.customer-password-reset');
+        return $this->subject("Your Queen's Cup password reset OTP")
+            ->text('emails.customer-password-reset-otp');
     }
 }

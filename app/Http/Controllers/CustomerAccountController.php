@@ -7,7 +7,8 @@ use App\Services\CustomerAccountService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -97,43 +98,48 @@ class CustomerAccountController extends Controller
         $user = User::where('email', $data['email'])->where('role', 'customer')->first();
 
         if ($user) {
-            $token = Password::broker('users')->createToken($user);
-            $user->sendPasswordResetNotification($token);
+            $otp = (string) random_int(100000, 999999);
+
+            DB::table('password_resets')->updateOrInsert(
+                ['email' => $user->email],
+                ['token' => Hash::make($otp), 'created_at' => now()]
+            );
+
+            Mail::to($user->email)->send(
+                new \App\Mail\CustomerPasswordResetOtpMail($user->name, $otp)
+            );
         }
 
         return response()->json([
-            'message' => 'If that email belongs to a customer account, a password reset link is on its way.',
-        ]);
-    }
-
-    public function showResetPassword(Request $request, string $token)
-    {
-        return view('customer-reset-password', [
-            'token' => $token,
-            'email' => $request->query('email', ''),
+            'message' => 'If that email belongs to a customer account, a 6-digit OTP is on its way.',
         ]);
     }
 
     public function resetPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'token' => ['required', 'string'],
+            'otp' => ['required', 'digits:6'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
         ]);
 
         $user = User::where('email', $data['email'])->where('role', 'customer')->first();
         if (! $user) {
-            throw ValidationException::withMessages(['email' => 'This password reset link is invalid or has expired.']);
+            throw ValidationException::withMessages(['email' => 'This OTP is invalid or has expired.']);
         }
 
-        $status = Password::broker('users')->reset($data, function (User $user, string $password) {
-            $user->forceFill(['password' => Hash::make($password)])->save();
-        });
-
-        if ($status !== Password::PASSWORD_RESET) {
-            throw ValidationException::withMessages(['email' => __($status)]);
+        $reset = DB::table('password_resets')->where('email', $user->email)->first();
+        if (
+            ! $reset ||
+            ! $reset->created_at ||
+            now()->diffInMinutes($reset->created_at) > 60 ||
+            ! Hash::check($data['otp'], $reset->token)
+        ) {
+            throw ValidationException::withMessages(['otp' => 'That OTP is invalid or has expired.']);
         }
+
+        $user->forceFill(['password' => Hash::make($data['password'])])->save();
+        DB::table('password_resets')->where('email', $user->email)->delete();
 
         return response()->json(['message' => 'Your password has been reset. You can now sign in.']);
     }
