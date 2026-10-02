@@ -69,7 +69,10 @@ document.getElementById('resetButton').addEventListener('click', function () {
       .then(function(result){
           message.textContent=result.ok ? result.data.message : ((result.data.errors && Object.values(result.data.errors)[0][0]) || 'The OTP is invalid or expired.');
           message.className='message'+(result.ok?'':' error'); message.style.display='block';
-          if(result.ok) document.getElementById('resetFields').style.display='none';
+          if(result.ok) {
+              document.getElementById('resetFields').style.display='none';
+              setTimeout(function(){ window.location.href='{{ route('orders') }}'; }, 1200);
+          }
       });
 });
 </script>
